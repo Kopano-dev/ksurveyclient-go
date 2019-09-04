@@ -66,7 +66,7 @@ func (pc *programCollector) Collect(ch chan<- Metric) {
 			version = DefaultProgramVersion
 		}
 		ch <- MustNewConstMapMetric("program_version", map[string]interface{}{
-			"desc":  "Program name",
+			"desc":  "Program version",
 			"type":  "string",
 			"value": version,
 		})
