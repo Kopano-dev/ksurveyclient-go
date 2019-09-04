@@ -18,11 +18,16 @@ package autosurvey
 
 import (
 	"context"
+	"os"
 
 	"stash.kopano.io/kgol/ksurveyclient-go"
 )
 
 func init() {
+	if v := os.Getenv("KOPANO_SURVEYCLIENT_AUTOSURVEY"); v == "false" || v == "no" {
+		return
+	}
+
 	reg := ksurveyclient.DefaultRegistry
 	reg.MustRegister(ksurveyclient.NewProgramCollector("", ""))
 
