@@ -33,3 +33,14 @@ func init() {
 
 	ksurveyclient.StartKSurveyClient(context.Background(), nil, nil)
 }
+
+// SetProgramNameAndVersion allows to sets the program collector data when using
+// autosurvey.
+func SetProgramNameAndVersion(name, version string) {
+	if name != "" {
+		ksurveyclient.DefaultProgramName = name
+	}
+	if version != "" {
+		ksurveyclient.DefaultProgramVersion = version
+	}
+}

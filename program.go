@@ -21,10 +21,12 @@ import (
 	"path"
 )
 
-// ProgramVersion defines the default proram version number that is being used
-// when not provided directly. It is exposed here so it can be set at compile
-// time.
-var ProgramVersion = "0.0.0-unknown"
+// Default proram name and version number which are being used when not provided
+// directly or empty. It is exposed here so it can be overriden.
+var (
+	DefaultProgramName    = "unknown"
+	DefaultProgramVersion = "0.0.0-unknown"
+)
 
 type programCollector struct {
 	name    string
@@ -36,9 +38,6 @@ func NewProgramCollector(name string, version string) Collector {
 	if name == "" {
 		name = path.Base(os.Args[0])
 	}
-	if version == "" {
-		version = ProgramVersion
-	}
 
 	return &programCollector{
 		name:    name,
@@ -49,15 +48,27 @@ func NewProgramCollector(name string, version string) Collector {
 // Collect first gathers the associated managers collectors managers data. Then
 // it creates constant metrics based on the returned data.
 func (pc *programCollector) Collect(ch chan<- Metric) {
-	ch <- MustNewConstMapMetric("program_name", map[string]interface{}{
-		"desc":  "Program name",
-		"type":  "string",
-		"value": pc.name,
-	})
+	func() {
+		name := pc.name
+		if pc.name == "" {
+			name = DefaultProgramName
+		}
+		ch <- MustNewConstMapMetric("program_name", map[string]interface{}{
+			"desc":  "Program name",
+			"type":  "string",
+			"value": name,
+		})
+	}()
 
-	ch <- MustNewConstMapMetric("program_version", map[string]interface{}{
-		"desc":  "Program name",
-		"type":  "string",
-		"value": pc.version,
-	})
+	func() {
+		version := pc.version
+		if version == "" {
+			version = DefaultProgramVersion
+		}
+		ch <- MustNewConstMapMetric("program_version", map[string]interface{}{
+			"desc":  "Program name",
+			"type":  "string",
+			"value": version,
+		})
+	}()
 }
