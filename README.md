@@ -28,7 +28,9 @@ of a default survey client, set KOPANO_SURVEYCLIENT_AUTOSURVEY to `false` or
 
 ## Integration
 
-The API of this model is loosely modelled after [prometheus/client_golang/prometheus](https://github.com/prometheus/client_golang)
+[![GoDoc](https://godoc.org/stash.kopano.io/kgol/ksurveyclient-go?status.svg)](https://godoc.org/stash.kopano.io/kgol/ksurveyclient-go)
+
+The API of this module is loosely modeled after [prometheus/client_golang/prometheus](https://github.com/prometheus/client_golang)
 and offers various levels of integration. Easiest is to import the `autosurvey`
 submodule to enable automatic gathering and submitting of the default collectors
 on application start by calling `autosurvey.MustStart`.
