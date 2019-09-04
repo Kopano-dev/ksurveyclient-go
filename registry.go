@@ -47,6 +47,11 @@ func (reg *Registry) Register(c Collector) error {
 	return nil
 }
 
+// Register registers the provided Collector with the default Registry.
+func Register(c Collector) error {
+	return DefaultRegistry.Register(c)
+}
+
 // MustRegister registers the provided Collectors with the accociated Registry
 // and panics if any error occurs.
 func (reg *Registry) MustRegister(cs ...Collector) {
@@ -55,6 +60,12 @@ func (reg *Registry) MustRegister(cs ...Collector) {
 			panic(err)
 		}
 	}
+}
+
+// MustRegister registers the provided Collectors with the default Registry
+// and panics if any error occurs.
+func MustRegister(cs ...Collector) {
+	DefaultRegistry.MustRegister(cs...)
 }
 
 // Gather calls the Collect method of the registered Collectors and then
