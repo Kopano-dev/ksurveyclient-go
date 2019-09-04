@@ -18,20 +18,40 @@ package autosurvey
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	"stash.kopano.io/kgol/ksurveyclient-go"
 )
 
+var disabled = false
+
 func init() {
 	if v := os.Getenv("KOPANO_SURVEYCLIENT_AUTOSURVEY"); v == "false" || v == "no" {
+		disabled = true
 		return
+	}
+
+	go start()
+}
+
+var started = false
+
+// start is the function which gets auto survey up and running. Normally it is
+// called automatically on module init.
+func start() error {
+	if started {
+		return errors.New("already started")
+	}
+	started = true
+	if disabled {
+		return nil
 	}
 
 	reg := ksurveyclient.DefaultRegistry
 	reg.MustRegister(ksurveyclient.NewProgramCollector("", ""))
 
-	ksurveyclient.StartKSurveyClient(context.Background(), nil, nil)
+	return ksurveyclient.StartKSurveyClient(context.Background(), nil, nil)
 }
 
 // SetProgramNameAndVersion allows to sets the program collector data when using
