@@ -20,26 +20,41 @@ import (
 	"context"
 	"errors"
 	"os"
+	"sync"
 
 	"stash.kopano.io/kgol/ksurveyclient-go"
 )
 
 var disabled = false
+var mutex sync.Mutex
 
 func init() {
 	if v := os.Getenv("KOPANO_SURVEYCLIENT_AUTOSURVEY"); v == "false" || v == "no" {
 		disabled = true
 		return
 	}
-
-	go start()
 }
 
 var started = false
 
-// start is the function which gets auto survey up and running. Normally it is
-// called automatically on module init.
-func start() error {
+// Start is the function which gets auto survey up and running using the default
+// configuration and the default registry with some standard collectors.
+func Start(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) error {
+	return start(ctx, name, version, cs...)
+}
+
+// MustStart is the function which gets auto survey with Start up and running
+// but panics if start fails.
+func MustStart(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) {
+	err := Start(ctx, name, version, cs...)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func start(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	if started {
 		return errors.New("already started")
 	}
@@ -49,18 +64,15 @@ func start() error {
 	}
 
 	reg := ksurveyclient.DefaultRegistry
-	reg.MustRegister(ksurveyclient.NewProgramCollector("", ""))
-
-	return ksurveyclient.StartKSurveyClient(context.Background(), nil, nil)
-}
-
-// SetProgramNameAndVersion allows to sets the program collector data when using
-// autosurvey.
-func SetProgramNameAndVersion(name, version string) {
-	if name != "" {
-		ksurveyclient.DefaultProgramName = name
+	err := reg.Register(ksurveyclient.NewProgramCollector(name, version))
+	if err != nil {
+		return nil
 	}
-	if version != "" {
-		ksurveyclient.DefaultProgramVersion = version
+	for _, c := range cs {
+		err = reg.Register(c)
+		if err != nil {
+			return err
+		}
 	}
+	return ksurveyclient.StartKSurveyClient(ctx, nil, nil)
 }
