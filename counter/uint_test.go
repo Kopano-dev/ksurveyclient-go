@@ -51,3 +51,41 @@ func TestUint(t *testing.T) {
 		t.Errorf("value after dec %v from 0 is not 0", v)
 	}
 }
+
+func TestUintMax(t *testing.T) {
+	c := GetUintMax()
+	if v := c.Value(); v != 0 {
+		t.Fatalf("initial value %v is not 0", v)
+	}
+	c.Set(42)
+	if v := c.Value(); v != 42 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+	c.Set(100)
+	if v := c.Value(); v != 100 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+	c.Set(50)
+	if v := c.Value(); v != 100 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+}
+
+func TestUintMin(t *testing.T) {
+	c := GetUintMin()
+	if v := c.Value(); v != maxUint64 {
+		t.Fatalf("initial value %v is not max", v)
+	}
+	c.Set(42)
+	if v := c.Value(); v != 42 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+	c.Set(100)
+	if v := c.Value(); v != 42 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+	c.Set(5)
+	if v := c.Value(); v != 5 {
+		t.Fatalf("value after set %v is not the expected value", v)
+	}
+}
