@@ -121,7 +121,9 @@ func (c *uintMinImpl) Value() uint64 {
 	return atomic.LoadUint64(&c.value)
 }
 
+const maxUint64 = ^uint64(0)
+
 // GetUintMin returns a new counter to count minimum positive integers.
 func GetUintMin() UintMinMax {
-	return &uintMinImpl{}
+	return &uintMinImpl{value: maxUint64}
 }
