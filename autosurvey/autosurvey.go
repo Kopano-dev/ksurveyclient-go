@@ -28,7 +28,12 @@ import (
 var disabled = false
 var mutex sync.Mutex
 
+// DefaultRegistry exposes the registry which is used by autosurvey.
+var DefaultRegistry *ksurveyclient.Registry
+
 func init() {
+	DefaultRegistry = ksurveyclient.DefaultRegistry
+
 	if v := os.Getenv("KOPANO_SURVEYCLIENT_AUTOSURVEY"); v == "false" || v == "no" {
 		disabled = true
 		return
@@ -63,7 +68,7 @@ func start(ctx context.Context, name, version string, cs ...ksurveyclient.Collec
 		return nil
 	}
 
-	reg := ksurveyclient.DefaultRegistry
+	reg := DefaultRegistry
 	err := reg.Register(ksurveyclient.NewProgramCollector(name, version))
 	if err != nil {
 		return nil
