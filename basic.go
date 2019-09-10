@@ -43,7 +43,7 @@ func (mc *basicCollector) Collect(ch chan<- Metric) {
 				machineID = scanner.Text()
 			}
 		}
-		ch <- MustNewConstMapMetric("machine_id", map[string]interface{}{
+		ch <- MustNewConstMap("machine_id", map[string]interface{}{
 			"desc":  "",
 			"type":  "string",
 			"value": machineID,
@@ -56,7 +56,7 @@ func (mc *basicCollector) Collect(ch chan<- Metric) {
 		if err := syscall.Uname(&buf); err == nil {
 			prettyName = charsToString(buf.Sysname[:]) + " " + charsToString(buf.Machine[:]) + " " + charsToString(buf.Release[:])
 		}
-		ch <- MustNewConstMapMetric("utsname", map[string]interface{}{
+		ch <- MustNewConstMap("utsname", map[string]interface{}{
 			"desc":  "Pretty platform name",
 			"type":  "string",
 			"value": prettyName,
@@ -85,7 +85,7 @@ func (mc *basicCollector) Collect(ch chan<- Metric) {
 				prettyName = scanner.Text()
 			}
 		}
-		ch <- MustNewConstMapMetric("osrelease", map[string]interface{}{
+		ch <- MustNewConstMap("osrelease", map[string]interface{}{
 			"desc":  "Pretty operating system name",
 			"type":  "string",
 			"value": prettyName,

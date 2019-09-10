@@ -56,7 +56,7 @@ func (pc *programCollector) Collect(ch chan<- Metric) {
 		if pc.name == "" {
 			name = DefaultProgramName
 		}
-		ch <- MustNewConstMapMetric("program_name", map[string]interface{}{
+		ch <- MustNewConstMap("program_name", map[string]interface{}{
 			"desc":  "Program name",
 			"type":  "string",
 			"value": name,
@@ -68,7 +68,7 @@ func (pc *programCollector) Collect(ch chan<- Metric) {
 		if version == "" {
 			version = DefaultProgramVersion
 		}
-		ch <- MustNewConstMapMetric("program_version", map[string]interface{}{
+		ch <- MustNewConstMap("program_version", map[string]interface{}{
 			"desc":  "Program version",
 			"type":  "string",
 			"value": version,
@@ -80,7 +80,7 @@ func (pc *programCollector) Collect(ch chan<- Metric) {
 		if guid == nil {
 			guid = DefaultProgramGUID
 		}
-		ch <- MustNewConstMapMetric("server_guid", map[string]interface{}{
+		ch <- MustNewConstMap("server_guid", map[string]interface{}{
 			"desc":  "",
 			"type":  "string",
 			"value": string(guid),

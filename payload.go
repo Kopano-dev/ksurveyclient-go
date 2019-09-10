@@ -17,6 +17,6 @@
 package ksurveyclient
 
 type kSurveyPayloadV2 struct {
-	Version int     `json:"version"`
+	Version int        `json:"version"`
 	Stats   *MetricSet `json:"stats"`
 }

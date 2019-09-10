@@ -41,37 +41,6 @@ type MetricData struct {
 	Fields map[string]interface{}
 }
 
-type constMapMetric struct {
-	name   string
-	fields map[string]interface{}
-}
-
-// NewConstMapMetric creates a metric with the provided name and field data.
-func NewConstMapMetric(name string, fields map[string]interface{}) (Metric, error) {
-	// TODO(longsleep): Validate name and fields.
-	return &constMapMetric{
-		name:   name,
-		fields: fields,
-	}, nil
-}
-
-// MustNewConstMapMetric creates a metric with the provided name and field data
-// and panics of an error occurs.
-func MustNewConstMapMetric(name string, fields map[string]interface{}) Metric {
-	mdm, err := NewConstMapMetric(name, fields)
-	if err != nil {
-		panic(err)
-	}
-	return mdm
-}
-
-func (mdm *constMapMetric) Write(md *MetricData) error {
-	md.Name = mdm.name
-	md.Fields = mdm.fields
-
-	return nil
-}
-
 // Metric is the interface implemented by anything that can be used to provide
 // survey Metrics.
 type Metric interface {
