@@ -26,15 +26,17 @@ import (
 var (
 	DefaultProgramName    = "unknown"
 	DefaultProgramVersion = "0.0.0-unknown"
+	DefaultProgramGUID    = []byte("")
 )
 
 type programCollector struct {
 	name    string
 	version string
+	guid    []byte
 }
 
 // NewProgramCollector creates a Collector which collects program information.
-func NewProgramCollector(name string, version string) Collector {
+func NewProgramCollector(name string, version string, guid []byte) Collector {
 	if name == "" {
 		name = path.Base(os.Args[0])
 	}
@@ -42,6 +44,7 @@ func NewProgramCollector(name string, version string) Collector {
 	return &programCollector{
 		name:    name,
 		version: version,
+		guid:    guid,
 	}
 }
 
@@ -69,6 +72,18 @@ func (pc *programCollector) Collect(ch chan<- Metric) {
 			"desc":  "Program version",
 			"type":  "string",
 			"value": version,
+		})
+	}()
+
+	func() {
+		guid := pc.guid
+		if guid == nil {
+			guid = DefaultProgramGUID
+		}
+		ch <- MustNewConstMapMetric("server_guid", map[string]interface{}{
+			"desc":  "",
+			"type":  "string",
+			"value": string(guid),
 		})
 	}()
 }

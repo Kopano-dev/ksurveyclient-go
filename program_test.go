@@ -20,11 +20,15 @@ import (
 	"testing"
 )
 
+var testGUID = []byte("test-guid")
+
 func TestProgramCollector(t *testing.T) {
-	pc := NewProgramCollector("", "")
-	var metricChan = make(chan Metric, 2)
-	pc.Collect(metricChan)
-	close(metricChan)
+	pc := NewProgramCollector("", "", testGUID)
+	var metricChan = make(chan Metric)
+	go func() {
+		pc.Collect(metricChan)
+		close(metricChan)
+	}()
 	for metric := range metricChan {
 		md := &MetricData{}
 		metric.Write(md)
@@ -38,6 +42,11 @@ func TestProgramCollector(t *testing.T) {
 			value := md.Fields["value"].(string)
 			if value != "0.0.0-unknown" {
 				t.Errorf("unexpected program_version: %v", value)
+			}
+		case "server_guid":
+			value := md.Fields["value"].(string)
+			if value != string(testGUID) {
+				t.Errorf("unexpected server_guid: %v", value)
 			}
 		default:
 			t.Errorf("unknown program metrics name: %v", md.Name)

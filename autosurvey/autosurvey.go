@@ -31,6 +31,10 @@ var mutex sync.Mutex
 // DefaultRegistry exposes the registry which is used by autosurvey.
 var DefaultRegistry *ksurveyclient.Registry
 
+// AutoHashGUID controls wehter or not the provided guid value is hashed before
+// transmission. If empty, no auto hashing is done.
+var AutoHashGUID = "v1"
+
 func init() {
 	DefaultRegistry = ksurveyclient.DefaultRegistry
 
@@ -44,20 +48,20 @@ var started = false
 
 // Start is the function which gets auto survey up and running using the default
 // configuration and the default registry with some standard collectors.
-func Start(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) error {
-	return start(ctx, name, version, cs...)
+func Start(ctx context.Context, name, version string, guid []byte, cs ...ksurveyclient.Collector) error {
+	return start(ctx, name, version, guid, cs...)
 }
 
 // MustStart is the function which gets auto survey with Start up and running
 // but panics if start fails.
-func MustStart(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) {
-	err := Start(ctx, name, version, cs...)
+func MustStart(ctx context.Context, name, version string, guid []byte, cs ...ksurveyclient.Collector) {
+	err := Start(ctx, name, version, guid, cs...)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func start(ctx context.Context, name, version string, cs ...ksurveyclient.Collector) error {
+func start(ctx context.Context, name, version string, guid []byte, cs ...ksurveyclient.Collector) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	if started {
@@ -69,7 +73,7 @@ func start(ctx context.Context, name, version string, cs ...ksurveyclient.Collec
 	}
 
 	reg := DefaultRegistry
-	err := reg.Register(ksurveyclient.NewProgramCollector(name, version))
+	err := reg.Register(ksurveyclient.NewProgramCollector(name, version, autoHashGUID(guid)))
 	if err != nil {
 		return nil
 	}
@@ -80,4 +84,15 @@ func start(ctx context.Context, name, version string, cs ...ksurveyclient.Collec
 		}
 	}
 	return ksurveyclient.StartKSurveyClient(ctx, nil, nil)
+}
+
+func autoHashGUID(guid []byte) []byte {
+	switch AutoHashGUID {
+	case "":
+		return guid
+	case "v1":
+		return ksurveyclient.HashGUIDv1(guid)
+	default:
+		panic("invalid/unsupported auto hash version")
+	}
 }
