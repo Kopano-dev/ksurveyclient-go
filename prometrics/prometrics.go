@@ -121,15 +121,18 @@ func (pm *proMetrics) Write(md *ksurveyclient.MetricData) error {
 		return err
 	}
 
-	var mt string
+	var mtype string
+	var mmode string
 	var value interface{}
 
 	switch {
 	case dtoMetric.Counter != nil:
-		mt = "int"
+		mtype = "int" // Alaways use int, even when its really float.
+		mmode = "counter"
 		value = dtoMetric.Counter.GetValue()
 	case dtoMetric.Gauge != nil:
-		mt = "gauge"
+		mtype = "int" // Alaways use int, even when its really float.
+		mmode = "gauge"
 		value = dtoMetric.Gauge.GetValue()
 	default:
 		return nil
@@ -137,7 +140,8 @@ func (pm *proMetrics) Write(md *ksurveyclient.MetricData) error {
 
 	m, err := ksurveyclient.NewConstMapMetric(pm.fqName, map[string]interface{}{
 		"desc":  pm.help,
-		"type":  mt,
+		"mode":  mmode,
+		"type":  mtype,
 		"value": value,
 	})
 	if err != nil {
