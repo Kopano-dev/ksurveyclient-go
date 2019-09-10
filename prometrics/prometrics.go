@@ -19,6 +19,7 @@ package prometrics
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
@@ -71,6 +72,9 @@ type proMetrics struct {
 	fqName string
 	help   string
 
+	mtype string
+	mmode string
+
 	err error
 }
 
@@ -86,6 +90,9 @@ func newProMetrics(metric prometheus.Metric, whitelist map[string]string) *proMe
 	if !fqNameValue.IsValid() {
 		err = errors.New("no fqName field")
 	}
+
+	mtype := ""
+	mmode := ""
 	fqName := fqNameValue.String()
 	if whitelist != nil {
 		alias, ok := whitelist[fqName]
@@ -93,6 +100,16 @@ func newProMetrics(metric prometheus.Metric, whitelist map[string]string) *proMe
 			return nil
 		}
 		if alias != "" {
+			// Alias format supported `alias,mmode:mtype`.
+			aliasParts := strings.SplitN(alias, ",", 2)
+			alias = aliasParts[0]
+			if len(aliasParts) > 1 {
+				formatParts := strings.SplitN(aliasParts[1], ":", 2)
+				mmode = formatParts[0]
+				if len(formatParts) > 1 {
+					mtype = formatParts[1]
+				}
+			}
 			fqName = alias
 		}
 	}
@@ -106,6 +123,9 @@ func newProMetrics(metric prometheus.Metric, whitelist map[string]string) *proMe
 
 		fqName: fqName,
 		help:   help.String(),
+
+		mtype: mtype,
+		mmode: mmode,
 
 		err: err,
 	}
@@ -125,17 +145,26 @@ func (pm *proMetrics) Write(md *ksurveyclient.MetricData) error {
 	var mmode string
 	var value interface{}
 
+	// Set defaults from prometheus metrics data.
 	switch {
 	case dtoMetric.Counter != nil:
-		mtype = "int" // Alaways use int, even when its really float.
+		mtype = "float"
 		mmode = "counter"
 		value = dtoMetric.Counter.GetValue()
 	case dtoMetric.Gauge != nil:
-		mtype = "int" // Alaways use int, even when its really float.
+		mtype = "float"
 		mmode = "gauge"
 		value = dtoMetric.Gauge.GetValue()
 	default:
 		return nil
+	}
+
+	// Apply overrides from alias mapping if set.
+	if pm.mtype != "" {
+		mtype = pm.mtype
+	}
+	if pm.mmode != "" {
+		mmode = pm.mmode
 	}
 
 	m, err := ksurveyclient.NewConstMapMetric(pm.fqName, map[string]interface{}{
@@ -157,8 +186,19 @@ type registry struct {
 }
 
 // WrapRegistry wraps the provided ksurveyclient.Registry so it can register
-// prometheus.Collectors with optional filter and aliasing wit hthe provided
+// prometheus.Collectors with optional filter and aliasing with the provided
 // whitelist map.
+//
+// Example whitelist with formatting:
+//
+// map[string]string{
+//	"rtm_distinct_users_connected_max": "usercnt_active,gauge:int",
+//	"rtm_group_channels_created_max":   "usercnt_room,gauge:int",
+//	"rtm_channels_created_max":         "usercnt_equipment,gauge:int",
+//	"rtm_connections_connected_max":    "usercnt_nonactive,gauge:int",
+//	"guest_http_logon_success_total":   "usercnt_na_user,gauge:int",
+// }
+//
 func WrapRegistry(reg *ksurveyclient.Registry, whitelist map[string]string) prometheus.Registerer {
 	if reg == nil {
 		reg = DefaultRegistry
