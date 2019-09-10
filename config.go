@@ -29,6 +29,7 @@ type Config struct {
 	ErrorDelay uint64
 	Interval   uint64
 	Insecure   bool
+	UserAgent  string
 
 	Logger     logger
 	HTTPClient *http.Client
@@ -42,6 +43,7 @@ func (c *Config) Clone() *Config {
 		ErrorDelay: c.ErrorDelay,
 		Interval:   c.Interval,
 		Insecure:   c.Insecure,
+		UserAgent:  c.UserAgent,
 
 		Logger: c.Logger,
 	}
@@ -54,6 +56,7 @@ var DefaultConfig = &Config{
 	ErrorDelay: 60,
 	Interval:   3600,
 	Insecure:   false,
+	UserAgent:  "ksurveyclient-go/1.0",
 }
 
 func init() {

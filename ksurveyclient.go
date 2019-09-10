@@ -44,6 +44,7 @@ type kSurveyClient struct {
 	startDelay uint64
 	errorDelay uint64
 	interval   uint64
+	userAgent  string
 
 	registry *Registry
 
@@ -66,6 +67,7 @@ func StartKSurveyClient(ctx context.Context, config *Config, registry *Registry)
 	ksv := &kSurveyClient{
 		startDelay: config.StartDelay,
 		interval:   config.Interval,
+		userAgent:  config.UserAgent,
 
 		registry: registry,
 
@@ -170,6 +172,9 @@ func (ksv *kSurveyClient) Do() error {
 	req, err := http.NewRequest(http.MethodPost, ksv.url.String(), &buf)
 	req.Header.Set("X-Kopano-Stats-Request", "1")
 	req.Header.Set("Content-Type", "application/json")
+	if ksv.userAgent != "" {
+		req.Header.Set("User-Agent", ksv.userAgent)
+	}
 
 	resp, err := ksv.client.Do(req)
 	if err != nil {

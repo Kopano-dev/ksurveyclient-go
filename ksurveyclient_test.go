@@ -33,6 +33,9 @@ func TestMain(m *testing.M) {
 func TestStartKSurveyClient(t *testing.T) {
 	ok := false
 	ts := httptest.NewTLSServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("User-Agent") != DefaultConfig.UserAgent {
+			t.Errorf("unexpected User-Agent: %v in request", req.Header.Get("User-Agent"))
+		}
 		// TODO(longsleep): Validate incoming request data.
 		ok = true
 	}))

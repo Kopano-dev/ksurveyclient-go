@@ -31,12 +31,16 @@ var mutex sync.Mutex
 // DefaultRegistry exposes the registry which is used by autosurvey.
 var DefaultRegistry *ksurveyclient.Registry
 
+// DefaultConfig exposes the config which is used by autosurvey.
+var DefaultConfig *ksurveyclient.Config
+
 // AutoHashGUID controls wehter or not the provided guid value is hashed before
 // transmission. If empty, no auto hashing is done.
 var AutoHashGUID = "v1"
 
 func init() {
 	DefaultRegistry = ksurveyclient.DefaultRegistry
+	DefaultConfig = ksurveyclient.DefaultConfig
 
 	if v := os.Getenv("KOPANO_SURVEYCLIENT_AUTOSURVEY"); v == "false" || v == "no" {
 		disabled = true
@@ -83,7 +87,14 @@ func start(ctx context.Context, name, version string, guid []byte, cs ...ksurvey
 			return err
 		}
 	}
-	return ksurveyclient.StartKSurveyClient(ctx, nil, nil)
+
+	config := DefaultConfig.Clone()
+	config.UserAgent = name
+	if version != "" {
+		config.UserAgent += "/" + version
+	}
+
+	return ksurveyclient.StartKSurveyClient(ctx, config, reg)
 }
 
 func autoHashGUID(guid []byte) []byte {
