@@ -17,7 +17,8 @@
 package ksurveyclient
 
 import (
-	"encoding/base64"
+	"bytes"
+	"encoding/hex"
 
 	"golang.org/x/crypto/blake2b"
 )
@@ -25,7 +26,7 @@ import (
 // HashGUIDv1 takes the provided GUID and returns its hash.
 func HashGUIDv1(rawGUID []byte) []byte {
 	value := blake2b.Sum256(rawGUID)
-	out := make([]byte, base64.RawStdEncoding.EncodedLen(len(value)))
-	base64.RawStdEncoding.Encode(out, value[:])
-	return out
+	out := make([]byte, hex.EncodedLen(len(value)))
+	hex.Encode(out, value[:])
+	return bytes.ToUpper(out)
 }

@@ -23,7 +23,7 @@ import (
 func TestHashGUIDv1(t *testing.T) {
 	raw := []byte("test-guid-1")
 	guid := HashGUIDv1(raw)
-	if string(guid) != "NtLPQy6omwNNFFMR17ABv0r0JWZu63ZSiWpsWlSXXRY" {
+	if string(guid) != "36D2CF432EA89B034D145311D7B001BF4AF425666EEB7652896A6C5A54975D16" {
 		t.Fatalf("unexpected value: %v", string(guid))
 	}
 }
