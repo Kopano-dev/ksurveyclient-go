@@ -167,7 +167,7 @@ func (pm *proMetrics) Write(md *ksurveyclient.MetricData) error {
 		mmode = pm.mmode
 	}
 
-	m, err := ksurveyclient.NewConstMapMetric(pm.fqName, map[string]interface{}{
+	m, err := ksurveyclient.NewConstMap(pm.fqName, map[string]interface{}{
 		"desc":  pm.help,
 		"mode":  mmode,
 		"type":  mtype,
